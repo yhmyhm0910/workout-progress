@@ -1,0 +1,58 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.ide
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet Packages
+*.nupkg
+**/packages/*
+!**/packages/build/
+!**/packages/build/Package/ContentFiles/*
+!**/packages/build/Package/Tools/*
+**/project.lock.json
+**/project.fragment.lock.json
+
+# Test Results
+TestResults/
+*.trx
+
+# Logs
+*.log
+
+# User-specific files
+*.rsuser
+*.sln.ide
+*.sln.docstates
+
+# Other files
+*.cache
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pdb
+*.pdb.*
+
+# Coverage Reports
+coverage/
+*.coverage
+*.coveragexml
+
+# Other
+*.swp
+*.swo
