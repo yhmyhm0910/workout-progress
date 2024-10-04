@@ -39,3 +39,9 @@
 /Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Sprache.dll
 /Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Newtonsoft.Json.dll
 /Users/jerryyip/Projects/workout-progress/dotnet-backend/obj/Debug/net8.0/dotnet-backend.sourcelink.json
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/BaseExercises.json
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Npgsql.dll
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.dll
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Relational.dll
+/Users/jerryyip/Projects/workout-progress/dotnet-backend/bin/Debug/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll
