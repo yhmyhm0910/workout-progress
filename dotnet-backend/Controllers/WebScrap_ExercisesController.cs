@@ -14,13 +14,13 @@ public class WebScrap_ExercisesController : ControllerBase
         _httpClientFactory = httpClientFactory;
     }
 
-    [HttpGet("exercises")]
+    [HttpGet("AllExercises")]
     public async Task<IActionResult> GetExercises()
     {
         var serverUrl = Environment.GetEnvironmentVariable("SERVER_URL");
         var scrap = new Scraper();
 
-        var exercisesFound = scrap.ScrapExercisesNameandLifts();
+        var exercisesFound = scrap.ScrapAllExercisesNameandLifts();
 
         // Call exercise-specific APIs and store them
         List<List<List<string>>> allStandards = new List<List<List<string>>>();
@@ -29,7 +29,7 @@ public class WebScrap_ExercisesController : ControllerBase
         for (int i = 0; i < 287; i++)
         {
             var httpClient = _httpClientFactory.CreateClient();
-            var fetchMaleDataResponse = await httpClient.GetAsync($"{serverUrl}fetchMaleData/{exercisesFound.exercisesFound_URL.Name[i]}");
+            var fetchMaleDataResponse = await httpClient.GetAsync($"{serverUrl}api/WebScrap_Exercises/fetchMaleData/{exercisesFound.exercisesFound_URL.Name[i]}");
 
             if (!fetchMaleDataResponse.IsSuccessStatusCode)
             {
@@ -66,6 +66,33 @@ public class WebScrap_ExercisesController : ControllerBase
 
         // Return the table data as a JSON response
         return Ok(json);
+    }
+
+    [HttpGet("ExercisesByBodyParts")]
+    public async Task<IActionResult> GetExercisesByBodyParts()
+    {
+        var serverUrl = Environment.GetEnvironmentVariable("SERVER_URL");
+        var scrap = new Scraper();
+        string[] bodyParts =["Back", "Biceps", "Chest", "Core", "Forearms", "Legs", "Shoulders", "Triceps"];
+        for (int i=0; i<bodyParts.Length; i++) {
+            var exercisesFound = scrap.ScrapExercisesNameByBodyParts(bodyParts[i]);
+
+            // Call exercise-specific APIs and store them
+            List<List<List<string>>> allStandards = new List<List<List<string>>>();
+
+            // Return both /exercises data and /fetchMaleData data
+            var responseData = new
+            {
+                ExercisesFound = exercisesFound.exercisesFound_display,
+                MaleData = allStandards
+            };
+
+            string json = JsonConvert.SerializeObject(responseData, Formatting.Indented);
+            await System.IO.File.WriteAllTextAsync($"{bodyParts[i]}Exercises.json", json); // Use async file write
+        };
+
+        // Return the table data as a JSON response
+        return Ok("Successful strapping different body parts' names");
     }
 
     [HttpGet("fetchMaleData/{exerciseName}")]

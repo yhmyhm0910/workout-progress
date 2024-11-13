@@ -1,4 +1,6 @@
 using Npgsql;
+using workout_progress.Models;
+using Newtonsoft.Json;
 
 public class Database
 {
@@ -34,7 +36,81 @@ public class Database
         return result;
     }
 
-    public async Task<int> InsertUserAsync(string databaseUrl, string query, int userId, string exerciseName, string email)
+    public async Task<List<Dictionary<string, object>>> isRefreshTokenValidAsync(string databaseUrl, string query, string refresh_token)
+    {
+        var result = new List<Dictionary<string, object>>();
+        try
+        {
+            using var connection = GetConnection(databaseUrl);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(query, connection);
+            
+            command.Parameters.AddWithValue("RefreshToken", refresh_token);
+            
+            // Execute the SELECT query and get the result
+            using var reader = await command.ExecuteReaderAsync();
+
+            // Read each row
+            while (await reader.ReadAsync())
+            {
+                var row = new Dictionary<string, object>();
+
+                // Loop through each column in the row
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row[reader.GetName(i)] = reader.GetValue(i);
+                }
+
+                result.Add(row);
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting user: {ex.Message}");
+            return result; // Indicating failure
+        }
+    }
+    
+    public async Task<List<Dictionary<string, object>>> isUserExistAsync(string databaseUrl, string query, string userId)
+    {
+        var result = new List<Dictionary<string, object>>();
+        try
+        {
+            using var connection = GetConnection(databaseUrl);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(query, connection);
+            
+            command.Parameters.AddWithValue("UserId", userId);
+            
+            // Execute the SELECT query and get the result
+            using var reader = await command.ExecuteReaderAsync();
+
+            // Read each row
+            while (await reader.ReadAsync())
+            {
+                var row = new Dictionary<string, object>();
+
+                // Loop through each column in the row
+                for (int i = 0; i < reader.FieldCount; i++)
+                {
+                    row[reader.GetName(i)] = reader.GetValue(i);
+                }
+
+                result.Add(row);
+            }
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting user: {ex.Message}");
+            return result; // Indicating failure
+        }
+    }
+
+    public async Task<int> InsertUserAsync(string databaseUrl, string query, string userId, string name, string email, string refresh_token)
     {
         try
         {
@@ -42,10 +118,11 @@ public class Database
             await connection.OpenAsync();
 
             using var command = new NpgsqlCommand(query, connection);
-
+            
             command.Parameters.AddWithValue("UserId", userId);
-            command.Parameters.AddWithValue("Name", exerciseName);
+            command.Parameters.AddWithValue("Name", name);
             command.Parameters.AddWithValue("Email", email);
+            command.Parameters.AddWithValue("RefreshToken", refresh_token);
             DateTime now = DateTime.Now;
             command.Parameters.AddWithValue("Created_at", now);
 
@@ -61,7 +138,7 @@ public class Database
         }
     }
 
-    public async Task<int> InsertRecordAsync(string databaseUrl, string query, int userId, string exerciseName, float oneRepMax, string unit)
+    public async Task<int> InsertRecordAsync(string databaseUrl, string query, string userId, string exerciseName, float oneRepMax, string unit)
     {
         try
         {
@@ -89,7 +166,140 @@ public class Database
         }
     }
 
-    public async Task<int> DeleteUserAsync(string databaseUrl, string query, int userId)
+    public async Task<int> InsertStandardAsync(string databaseUrl, string query)
+    {
+        try
+        {
+            using var connection = GetConnection(databaseUrl);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(query, connection);
+
+            string jsonFilePath = "./BaseExercises.json";
+            string jsonString = await File.ReadAllTextAsync(jsonFilePath);
+            Exercises_NameLiftsAndStandards data = JsonConvert.DeserializeObject<Exercises_NameLiftsAndStandards>(jsonString);
+
+            if (data != null && data.ExercisesFound != null && data.ExercisesFound.Name != null && data.MaleData != null)
+            {
+                for (int i=0; i<data.ExercisesFound.Name.Count; i++)
+                {
+                    Console.WriteLine(data.ExercisesFound.Name[i]);
+                    string[,] lbs_per_BW = new string[5, 21];
+
+                    int idx = 0;
+                    foreach (var md_allBW in data.MaleData[i])
+                    {
+                        Console.WriteLine("BW: " + md_allBW[0]);
+                        Console.WriteLine("Beginner: " + md_allBW[1]);
+                        for (int j=0; j<lbs_per_BW.GetLength(0); j++) 
+                        {
+                            lbs_per_BW[j,idx] = md_allBW[j+1];
+                        }
+                        // Console.WriteLine("Novice: " + md_allBW[2]);
+                        // Console.WriteLine("Intermediate: " + md_allBW[3]);
+                        // Console.WriteLine("Advanced: " + md_allBW[4]);
+                        // Console.WriteLine("Elite: " + md_allBW[5]);
+                        // lbs_per_BW[idx,1] = md_allBW[1];
+                        idx++;
+                    }
+                    Console.WriteLine("lbs_per_BW: " + string.Join(", ", lbs_per_BW));
+                    for (int j=0; j<lbs_per_BW.GetLength(0); j++)
+                    {
+                        command.Parameters.Clear();
+                        command.Parameters.AddWithValue("Name", data.ExercisesFound.Name[i]);
+                        switch (j)
+                        {
+                            case 0:
+                                command.Parameters.AddWithValue("Level", "Beginner");
+                                break;
+                            case 1:
+                                command.Parameters.AddWithValue("Level", "Novice");
+                                break;
+                            case 2:
+                                command.Parameters.AddWithValue("Level", "Intermediate");
+                                break;
+                            case 3:
+                                command.Parameters.AddWithValue("Level", "Advanced");
+                                break;
+                            case 4:
+                                command.Parameters.AddWithValue("Level", "Elite");
+                                break;
+                            default:
+                                Console.WriteLine("Error detecting level of standard (Beginner, Novice, Intermediate, Advanced, or Elite)");
+                                return 0;
+                        }
+                        for (int k=110; k<=310; k += 10) 
+                        {
+                            int idx_weight_by_lbs = (k-110)/10;
+                            Console.WriteLine($"lbs_per_BW[idx_weight_by_lbs]: {lbs_per_BW[j,idx_weight_by_lbs]}");
+                            command.Parameters.AddWithValue(k.ToString(), lbs_per_BW[j,idx_weight_by_lbs]);
+                        };
+
+                        // Execute the INSERT query and return the number of affected rows
+                        int affectedRows = await command.ExecuteNonQueryAsync();
+                        Console.WriteLine($"affectedRows: {affectedRows}");
+                    }
+
+                }
+            }
+            
+            return 2;
+
+
+            // return affectedRows;  // Return the number of rows inserted (should typically be 1 for a single insert)
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error inserting record: {ex.Message}");
+            return 0; // Indicating failure
+        }
+    }
+
+    public async Task<int> UpdateRefreshTokenAsync(string databaseUrl, string query, string userId, string refresh_token)
+    {
+        try
+        {
+            using var connection = GetConnection(databaseUrl);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(query, connection);
+            command.Parameters.AddWithValue("RefreshToken", (object)refresh_token ?? DBNull.Value);
+            command.Parameters.AddWithValue("UserID", userId);
+
+            // Execute the INSERT query and return the number of affected rows
+            int affectedRows = await command.ExecuteNonQueryAsync();
+
+            return affectedRows;  // Return the number of rows inserted (should typically be 1 for a single insert)
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting record: {ex.Message}");
+            return 0; // Indicating failure
+        }
+    }
+
+    public async Task<int> DeleteStandardAsync(string databaseUrl, string query)
+    {
+        try
+        {
+            using var connection = GetConnection(databaseUrl);
+            await connection.OpenAsync();
+
+            using var command = new NpgsqlCommand(query, connection);
+
+            // Execute the INSERT query and return the number of affected rows
+            int affectedRows = await command.ExecuteNonQueryAsync();
+
+            return affectedRows;  // Return the number of rows inserted (should typically be 1 for a single insert)
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting standard: {ex.Message}");
+            return 0; // Indicating failure
+        }
+    }
+
+    public async Task<int> DeleteUserAsync(string databaseUrl, string query, string userId)
     {
         try
         {

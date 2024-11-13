@@ -107,7 +107,7 @@ export class DashboardComponent implements OnInit {
       };
     // this.httpClient.post(`${this.backend_apiUrl}/api/Database/InsertRecord`, params).subscribe(
     //   (res) => {
-    //     console.log(res); // Handle the re100sponse
+    //     console.log(res); // Handle the response
     //   },
     //   (error) => {
     //     console.error('Error fetching products', error); // Handle errors

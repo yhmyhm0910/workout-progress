@@ -1,0 +1,42 @@
+{
+  "ExercisesFound": {
+    "Name": [
+      "Dips",
+      "Tricep Pushdown",
+      "Lying Tricep Extension",
+      "Tricep Rope Pushdown",
+      "Dumbbell Tricep Extension",
+      "Tricep Extension",
+      "Lying Dumbbell Tricep Extension",
+      "Seated Dip Machine",
+      "Dumbbell Tricep Kickback",
+      "Cable Overhead Tricep Extension",
+      "Machine Tricep Extension",
+      "Seated Dumbbell Tricep Extension",
+      "JM Press",
+      "Reverse Grip Tricep Pushdown",
+      "Tate Press",
+      "Ring Dips",
+      "Bench Dips"
+    ],
+    "Lifts": [
+      "1,420,464 lifts",
+      "559,249 lifts",
+      "288,019 lifts",
+      "229,279 lifts",
+      "200,966 lifts",
+      "153,988 lifts",
+      "116,279 lifts",
+      "113,214 lifts",
+      "88,690 lifts",
+      "75,780 lifts",
+      "64,278 lifts",
+      "50,968 lifts",
+      "28,078 lifts",
+      "26,747 lifts",
+      "22,116 lifts",
+      "21,205 lifts"
+    ]
+  },
+  "MaleData": []
+}

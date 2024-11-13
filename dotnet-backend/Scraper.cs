@@ -5,81 +5,167 @@ using workout_progress.Models;
 
 public class Scraper
 {
-    public (Exercises_NameandLifts exercisesFound_display, Exercises_NameandLifts exercisesFound_URL) ScrapExercisesNameandLifts()
+    public (Exercises_NameandLifts exercisesFound_display, Exercises_NameandLifts exercisesFound_URL) ScrapAllExercisesNameandLifts()
     {
-    // Configure ChromeOptions to run in headless mode
-    var options = new ChromeOptions();
-    options.AddArgument("headless");
-    options.AddArgument("--no-sandbox");
-    options.AddArgument("--disable-dev-shm-usage");
+        // Configure ChromeOptions to run in headless mode
+        var options = new ChromeOptions();
+        options.AddArgument("headless");
+        options.AddArgument("--no-sandbox");
+        options.AddArgument("--disable-dev-shm-usage");
 
-    // Initialize ChromeDriver
-    using (IWebDriver driver = new ChromeDriver(options))
+        // Initialize ChromeDriver
+        using (IWebDriver driver = new ChromeDriver(options))
+        {
+            // Navigate to the target page
+            driver.Navigate().GoToUrl("https://strengthlevel.com/strength-standards");
+            IWebElement moreExerciseButton = driver.FindElement(By.XPath("//button[contains(text(), 'More Exercises...')]"));
+
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+            IWebElement element = wait.Until(drv =>
+                {
+                    IWebElement el = drv.FindElement(By.XPath("//button[contains(text(), 'More Exercises...')]"));
+                    return (el.Displayed && el.Enabled) ? el : null;
+                });
+
+            // Click button
+            for (int i=0; i<23; i++)
+            {
+                element.Click();
+                Thread.Sleep(500);
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", element);
+            }
+
+            IWebElement exercisesDiv = driver.FindElement(By.XPath("//div[contains(@class, 'columns')]"));
+
+            //logger.LogInformation("exercisesDiv Text: {Text}", exercisesDiv.Text);
+
+            var exercisesFound = new Exercises_NameandLifts();
+
+            int counter = 0;
+            string tempStr = "";
+            foreach (char c in exercisesDiv.Text)
+            {
+                if (c == '\n')
+                {
+                    if (counter % 2 == 0)
+                    {
+                        exercisesFound.Name.Add(tempStr);  
+                    }
+                    else
+                    {
+                        exercisesFound.Lifts.Add(tempStr);  
+                    };
+                    tempStr = "";
+                    counter++;
+                }
+                else
+                {
+                    tempStr += c;
+                };
+            };
+
+            // make names to be URL-ready
+            var exercisesFound_stripped = new Exercises_NameandLifts();
+            foreach (string exercise in exercisesFound.Name) 
+            {
+                string transformed = string.Concat(exercise.Select(c => c == ' ' ? '-' : char.ToLower(c)));
+                exercisesFound_stripped.Name.Add(transformed);
+            }
+
+            //logger.LogInformation("Finish scrapping exercises:\n{ListString}", string.Join("\n", exercisesFound_stripped.Name));
+
+            driver.Quit();
+
+            return (exercisesFound, exercisesFound_stripped);
+        }
+    }
+
+    public (Exercises_NameandLifts exercisesFound_display, Exercises_NameandLifts exercisesFound_URL) ScrapExercisesNameByBodyParts(string bodyPart)
     {
-        // Navigate to the target page
-        driver.Navigate().GoToUrl("https://strengthlevel.com/strength-standards");
-        IWebElement moreExerciseButton = driver.FindElement(By.XPath("//button[contains(text(), 'More Exercises...')]"));
+        // Configure ChromeOptions to run in headless mode
+        var options = new ChromeOptions();
+        // options.AddArgument("headless");
+        // options.AddArgument("--no-sandbox");
+        // options.AddArgument("--disable-dev-shm-usage");
 
-        WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+        // Initialize ChromeDriver
+        using (IWebDriver driver = new ChromeDriver(options))
+        {
+            // Navigate to the target page
+            driver.Navigate().GoToUrl("https://strengthlevel.com/strength-standards");
 
-        IWebElement element = wait.Until(drv =>
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+            IWebElement dropdown = driver.FindElement(By.Name("selectorbodypart"));
+            SelectElement selectElement = new SelectElement(dropdown);
+            IWebElement moreExerciseButtonElement = wait.Until(drv =>
             {
                 IWebElement el = drv.FindElement(By.XPath("//button[contains(text(), 'More Exercises...')]"));
                 return (el.Displayed && el.Enabled) ? el : null;
             });
 
-        // Click button
-        for (int i=0; i<23; i++)
-        {
-            element.Click();
-            Thread.Sleep(500);
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", element);
-        }
-
-        IWebElement exercisesDiv = driver.FindElement(By.XPath("//div[contains(@class, 'columns')]"));
-
-        //logger.LogInformation("exercisesDiv Text: {Text}", exercisesDiv.Text);
-
-        var exercisesFound = new Exercises_NameandLifts();
-
-        int counter = 0;
-        string tempStr = "";
-        foreach (char c in exercisesDiv.Text)
-        {
-            if (c == '\n')
+            if (dropdown != null) 
             {
-                if (counter % 2 == 0)
+                selectElement.SelectByText(bodyPart);
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", moreExerciseButtonElement);
+            }
+
+            // Click button
+            for (int i=0; i<23; i++)
+            {
+                if (moreExerciseButtonElement != null) 
                 {
-                    exercisesFound.Name.Add(tempStr);  
+                    moreExerciseButtonElement.Click();
+                    Thread.Sleep(500);
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", moreExerciseButtonElement);
+                }
+            }
+
+            IWebElement exercisesDiv = driver.FindElement(By.XPath("//div[contains(@class, 'columns')]"));
+
+            //logger.LogInformation("exercisesDiv Text: {Text}", exercisesDiv.Text);
+
+            var exercisesFound = new Exercises_NameandLifts();
+
+            int counter = 0;
+            string tempStr = "";
+            foreach (char c in exercisesDiv.Text)
+            {
+                if (c == '\n')
+                {
+                    if (counter % 2 == 0)
+                    {
+                        exercisesFound.Name.Add(tempStr);  
+                    }
+                    else
+                    {
+                        exercisesFound.Lifts.Add(tempStr);  
+                    };
+                    tempStr = "";
+                    counter++;
                 }
                 else
                 {
-                    exercisesFound.Lifts.Add(tempStr);  
+                    tempStr += c;
                 };
-                tempStr = "";
-                counter++;
-            }
-            else
-            {
-                tempStr += c;
             };
-        };
 
-        // make names to be URL-ready
-        var exercisesFound_stripped = new Exercises_NameandLifts();
-        foreach (string exercise in exercisesFound.Name) 
-        {
-            string transformed = string.Concat(exercise.Select(c => c == ' ' ? '-' : char.ToLower(c)));
-            exercisesFound_stripped.Name.Add(transformed);
+            // make names to be URL-ready
+            var exercisesFound_stripped = new Exercises_NameandLifts();
+            foreach (string exercise in exercisesFound.Name) 
+            {
+                string transformed = string.Concat(exercise.Select(c => c == ' ' ? '-' : char.ToLower(c)));
+                exercisesFound_stripped.Name.Add(transformed);
+            }
+
+            //logger.LogInformation("Finish scrapping exercises:\n{ListString}", string.Join("\n", exercisesFound_stripped.Name));
+
+            driver.Quit();
+
+            return (exercisesFound, exercisesFound_stripped);
         }
-
-        //logger.LogInformation("Finish scrapping exercises:\n{ListString}", string.Join("\n", exercisesFound_stripped.Name));
-
-        driver.Quit();
-
-        return (exercisesFound, exercisesFound_stripped);
     }
-}
 
     public IResult ScrapExercises(string exerciseName)
     {

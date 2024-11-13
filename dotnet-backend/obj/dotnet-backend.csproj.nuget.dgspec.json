@@ -47,6 +47,10 @@
               "target": "Package",
               "version": "[3.1.1, )"
             },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.10, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.8, )"
@@ -67,9 +71,13 @@
               "target": "Package",
               "version": "[8.0.8, )"
             },
+            "Selenium.Support": {
+              "target": "Package",
+              "version": "[4.25.0, )"
+            },
             "Selenium.WebDriver": {
               "target": "Package",
-              "version": "[4.24.0, )"
+              "version": "[4.25.0, )"
             },
             "Selenium.WebDriver.ChromeDriver": {
               "target": "Package",
@@ -78,6 +86,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.4.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.1.2, )"
             }
           },
           "imports": [

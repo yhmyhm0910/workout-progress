@@ -1,0 +1,52 @@
+{
+  "ExercisesFound": {
+    "Name": [
+      "Dumbbell Curl",
+      "Barbell Curl",
+      "Hammer Curl",
+      "EZ Bar Curl",
+      "Preacher Curl",
+      "Cable Bicep Curl",
+      "Incline Dumbbell Curl",
+      "Dumbbell Concentration Curl",
+      "Machine Bicep Curl",
+      "Strict Curl",
+      "One Arm Cable Bicep Curl",
+      "One Arm Dumbbell Preacher Curl",
+      "Incline Hammer Curl",
+      "Spider Curl",
+      "Seated Dumbbell Curl",
+      "Zottman Curl",
+      "Cheat Curl",
+      "Cable Hammer Curl",
+      "One Arm Pulldown",
+      "Overhead Cable Curl",
+      "Incline Cable Curl",
+      "Lying Cable Curl"
+    ],
+    "Lifts": [
+      "2,890,213 lifts",
+      "2,156,514 lifts",
+      "516,267 lifts",
+      "313,961 lifts",
+      "251,286 lifts",
+      "183,662 lifts",
+      "167,541 lifts",
+      "165,332 lifts",
+      "100,220 lifts",
+      "68,350 lifts",
+      "66,118 lifts",
+      "56,548 lifts",
+      "32,588 lifts",
+      "28,645 lifts",
+      "26,188 lifts",
+      "25,829 lifts",
+      "20,128 lifts",
+      "14,717 lifts",
+      "3,799 lifts",
+      "1,858 lifts",
+      "1,324 lifts"
+    ]
+  },
+  "MaleData": []
+}

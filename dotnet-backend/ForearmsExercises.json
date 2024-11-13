@@ -1,0 +1,20 @@
+{
+  "ExercisesFound": {
+    "Name": [
+      "Wrist Curl",
+      "Reverse Barbell Curl",
+      "Reverse Wrist Curl",
+      "Dumbbell Wrist Curl",
+      "Dumbbell Reverse Wrist Curl",
+      "Dumbbell Reverse Curl"
+    ],
+    "Lifts": [
+      "117,031 lifts",
+      "82,362 lifts",
+      "65,811 lifts",
+      "64,278 lifts",
+      "19,943 lifts"
+    ]
+  },
+  "MaleData": []
+}
