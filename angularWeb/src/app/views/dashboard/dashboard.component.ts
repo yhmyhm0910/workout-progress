@@ -1,9 +1,10 @@
-import { DOCUMENT, NgStyle } from '@angular/common';
+import { DOCUMENT, NgStyle, CommonModule } from '@angular/common';
 import { Component, DestroyRef, effect, inject, OnInit, Renderer2, signal, WritableSignal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ChartOptions, ChartData } from 'chart.js';
 import {
   AvatarComponent,
+  ButtonCloseDirective,
   ButtonDirective,
   ButtonGroupComponent,
   CardBodyComponent,
@@ -12,139 +13,156 @@ import {
   CardHeaderComponent,
   ColComponent,
   FormCheckLabelDirective,
+  FormDirective,
+  FormLabelDirective,
+  FormControlDirective,
+  FormCheckComponent,
+  FormCheckInputDirective,
   GutterDirective,
   ProgressBarDirective,
   ProgressComponent,
+  ModalBodyComponent,
+  ModalComponent,
+  ModalFooterComponent,
+  ModalHeaderComponent,
+  ModalTitleDirective,
+  ModalToggleDirective,
   RowComponent,
   TableDirective,
   TextColorDirective
 } from '@coreui/angular';
 import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { IconDirective } from '@coreui/icons-angular';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { WidgetsBrandComponent } from '../widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '../widgets/widgets-dropdown/widgets-dropdown.component';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
+import { exercises_name_by_body_part } from './dashboard-exercisesName.data'
 
-interface IUser {
-  name: string;
-  state: string;
-  registered: string;
-  country: string;
-  usage: number;
-  period: string;
-  payment: string;
-  activity: string;
-  avatar: string;
-  status: string;
-  color: string;
-}
+import { HttpClient } from '@angular/common/http';
+
+import { environment } from '../../../environment/environment';
+
 
 @Component({
   templateUrl: 'dashboard.component.html',
   styleUrls: ['dashboard.component.scss'],
   standalone: true,
-  imports: [WidgetsDropdownComponent, TextColorDirective, CardComponent, CardBodyComponent, RowComponent, ColComponent, ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressBarDirective, ProgressComponent, WidgetsBrandComponent, CardHeaderComponent, TableDirective, AvatarComponent]
+  imports: [CommonModule,WidgetsDropdownComponent, TextColorDirective, CardComponent, CardBodyComponent, RowComponent, ColComponent, ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressBarDirective, ProgressComponent, WidgetsBrandComponent, CardHeaderComponent, TableDirective, AvatarComponent, FormDirective, FormLabelDirective, FormControlDirective,   FormCheckComponent, FormCheckInputDirective, FormsModule, ModalComponent, ModalHeaderComponent, ModalTitleDirective, ModalBodyComponent, ModalFooterComponent, ModalToggleDirective, ButtonCloseDirective, NgbModule]
 })
+
 export class DashboardComponent implements OnInit {
 
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
   readonly #document: Document = inject(DOCUMENT);
   readonly #renderer: Renderer2 = inject(Renderer2);
   readonly #chartsData: DashboardChartsData = inject(DashboardChartsData);
+  readonly exercises_name_by_body_part: string[][] = exercises_name_by_body_part;
+  readonly backend_apiUrl: string = environment.backend_apiUrl;
+  isClicked = false;
+  addExercisesClicked = false;
+  today = { year: new Date().getFullYear(), month: new Date().getMonth() + 1, day: new Date().getDate() };
+  cardCount = 1; // Track the number of cards
 
-  public users: IUser[] = [
-    {
-      name: 'Yiorgos Avraamu',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Us',
-      usage: 50,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Mastercard',
-      activity: '10 sec ago',
-      avatar: './assets/images/avatars/1.jpg',
-      status: 'success',
-      color: 'success'
-    },
-    {
-      name: 'Avram Tarasios',
-      state: 'Recurring ',
-      registered: 'Jan 1, 2021',
-      country: 'Br',
-      usage: 10,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Visa',
-      activity: '5 minutes ago',
-      avatar: './assets/images/avatars/2.jpg',
-      status: 'danger',
-      color: 'info'
-    },
-    {
-      name: 'Quintin Ed',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'In',
-      usage: 74,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Stripe',
-      activity: '1 hour ago',
-      avatar: './assets/images/avatars/3.jpg',
-      status: 'warning',
-      color: 'warning'
-    },
-    {
-      name: 'Enéas Kwadwo',
-      state: 'Sleep',
-      registered: 'Jan 1, 2021',
-      country: 'Fr',
-      usage: 98,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Paypal',
-      activity: 'Last month',
-      avatar: './assets/images/avatars/4.jpg',
-      status: 'secondary',
-      color: 'danger'
-    },
-    {
-      name: 'Agapetus Tadeáš',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Es',
-      usage: 22,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'ApplePay',
-      activity: 'Last week',
-      avatar: './assets/images/avatars/5.jpg',
-      status: 'success',
-      color: 'primary'
-    },
-    {
-      name: 'Friderik Dávid',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Pl',
-      usage: 43,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Amex',
-      activity: 'Yesterday',
-      avatar: './assets/images/avatars/6.jpg',
-      status: 'info',
-      color: 'dark'
+  userId = 0;
+  selectedInputtingExerciseName = "";
+  inputtedOneRepMax = 0;
+  constructor(private httpClient: HttpClient) {}
+
+  ngOnInit(): void {
+    this.initCharts();
+    this.updateChartOnColorModeChange();
+  }
+
+  // Method to fetch products
+  getProducts() {
+    this.httpClient.get(`${this.backend_apiUrl}/api/Database/Select`, { withCredentials: true })
+    .subscribe(
+      (res) => {
+        console.log(res); // Handle the response
+      },
+      (error) => {
+        console.error('Error fetching products', error); // Handle errors
+      }
+    );
+  }
+
+
+
+  addExerciseButton() {
+    this.addExercisesClicked = !this.addExercisesClicked;
+  }
+
+  changeInputtingExercise(exercise: string) {
+    this.selectedInputtingExerciseName = exercise;
+  }
+
+  addRecordButton() {
+      const params = {
+        userId: this.userId,
+        exerciseName: this.selectedInputtingExerciseName,
+        oneRepMax: this.inputtedOneRepMax,
+        unit: "lbs"
+      };
+    // this.httpClient.post(`${this.backend_apiUrl}/api/Database/InsertRecord`, params).subscribe(
+    //   (res) => {
+    //     console.log(res); // Handle the re100sponse
+    //   },
+    //   (error) => {
+    //     console.error('Error fetching products', error); // Handle errors
+    //   }
+    // );
+  }
+
+  selectedBodyPart: string | null = null;
+
+  // Function to select only one checkbox at a time
+  selectOnly(bodyPart: string) {
+    // console.log("this.selectedBodyPart: " + this.selectedBodyPart);
+    // console.log("bodyPart: " + bodyPart);
+    // If the clicked body part is already selected, deselect it
+    if (this.selectedBodyPart === bodyPart) {
+      this.selectedBodyPart = null; // uncheck when clicked again
+    } else {
+      this.selectedBodyPart = bodyPart;
+
     }
-  ];
+  }
 
-  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  hhjj() {
+    this.getProducts();
+    this.isClicked = !this.isClicked;
+    this.cardCount++; // Increment the card count
+  }
+
+
+
+  months_experienced = [...Array(12).keys()]
 
   options = {
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Months Experienced' // Label for the x-axis
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Pound' // Label for the y-axis
+        }
+      }
+    },
     maintainAspectRatio: false
   };
 
   chartLineData: ChartData = {
-    labels: [...this.months].slice(0, 7),
+    labels: this.months_experienced,
     datasets: [
       {
-        label: 'My First dataset',
+        label: 'Common Standard',
         backgroundColor: 'rgba(220, 220, 220, 0.2)',
         borderColor: 'rgba(220, 220, 220, 1)',
         pointBackgroundColor: 'rgba(220, 220, 220, 1)',
@@ -152,7 +170,7 @@ export class DashboardComponent implements OnInit {
         data: [this.randomData, this.randomData, this.randomData, this.randomData, this.randomData, this.randomData, this.randomData]
       },
       {
-        label: 'My Second dataset',
+        label: 'My Record',
         backgroundColor: 'rgba(151, 187, 205, 0.2)',
         borderColor: 'rgba(151, 187, 205, 1)',
         pointBackgroundColor: 'rgba(151, 187, 205, 1)',
@@ -168,20 +186,11 @@ export class DashboardComponent implements OnInit {
 
   public mainChart: IChartProps = { type: 'line' };
   public mainChartRef: WritableSignal<any> = signal(undefined);
-  #mainChartRefEffect = effect(() => {
-    if (this.mainChartRef()) {
-      this.setChartStyles();
-    }
-  });
   public chart: Array<IChartProps> = [];
   public trafficRadioGroup = new FormGroup({
     trafficRadio: new FormControl('Month')
   });
 
-  ngOnInit(): void {
-    this.initCharts();
-    this.updateChartOnColorModeChange();
-  }
 
   initCharts(): void {
     this.mainChart = this.#chartsData.mainChart;
